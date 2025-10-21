@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escáner QR / Código de Barras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+      color: #222;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 26px;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    video {
+      margin-top: 20px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      display: none;
+    }
+    #output {
+      margin-top: 20px;
+      font-size: 18px;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>📷 Escanear código</h1>
+  <button id="startScan">Iniciar escaneo</button>
+  <video id="video" playsinline></video>
+  <div id="output"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script>
+    const video = document.getElementById('video');
+    const output = document.getElementById('output');
+    const button = document.getElementById('startScan');
+    const canvaLink = "https://www.canva.com/design/DAG11fihzbY/3CUtPiy-qj6QXLOcIko8Zg/edit?utm_content=DAG11fihzbY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton";
+
+    let scanning = false;
+
+    button.addEventListener('click', async () => {
+      if (scanning) return;
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      video.srcObject = stream;
+      video.play();
+      scanning = true;
+      button.style.display = 'none';
+      video.style.display = 'block';
+
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+
+      const scan = () => {
+        if (!scanning) return;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+        if (code) {
+          scanning = false;
+          video.srcObject.getTracks().forEach(track => track.stop());
+          output.textContent = "✅ Código detectado: " + code.data;
+
+          if (code.data === "0123456789128") {
+            output.textContent = "🔗 Redirigiendo al enlace de Canva...";
+            setTimeout(() => {
+              window.location.href = canvaLink;
+            }, 1500);
+          } else {
+            output.textContent = "❌ Código no reconocido";
+          }
+        } else {
+          requestAnimationFrame(scan);
+        }
+      };
+      requestAnimationFrame(scan);
+    });
+  </script>
+</body>
+</html>
