@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner de Código de Barras</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0072ff, #00c6ff);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: "Poppins", sans-serif;
+            text-align: center;
+            margin: 0;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        button {
+            background: white;
+            color: #0072ff;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background: #e8f0ff;
+            transform: scale(1.05);
+        }
+        #reader {
+            width: 320px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📸 Escáner de Código</h1>
+    <button id="startScan">Escanear Código</button>
+    <div id="reader"></div>
+
+    <script>
+        const startButton = document.getElementById("startScan");
+        const reader = document.getElementById("reader");
+
+        startButton.addEventListener("click", () => {
+            startButton.style.display = "none";
+            reader.style.display = "block";
+
+            const html5QrCode = new Html5Qrcode("reader");
+
+            const qrConfig = { fps: 10, qrbox: 250, facingMode: { exact: "environment" } };
+
+            html5QrCode.start(
+                { facingMode: "environment" }, // usa la cámara trasera
+                qrConfig,
+                (decodedText) => {
+                    // Si el código escaneado es tu número, redirige a tu imagen
+                    if (decodedText === "0123456789128") {
+                        window.location.href = "https://www.canva.com/design/DAG11fihzbY/3CUtPiy-qj6QXLOcIko8Zg/view";
+                    } else {
+                        alert("Código no reconocido: " + decodedText);
+                    }
+                    html5QrCode.stop();
+                },
+                (error) => { /* ignorar errores mientras escanea */ }
+            ).catch(err => {
+                alert("Error al iniciar cámara: " + err);
+                startButton.style.display = "block";
+                reader.style.display = "none";
+            });
+        });
+    </script>
+</body>
+</html>
