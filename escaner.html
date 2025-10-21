@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escáner de Código de Barras</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f8f9fa;
+      color: #333;
+      padding: 20px;
+    }
+    #video {
+      width: 90%;
+      max-width: 400px;
+      border-radius: 10px;
+      margin-top: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📷 Escanear Código de Barras</h1>
+  <p>Presiona el botón y apunta tu cámara al código.</p>
+
+  <button id="start-scan">Iniciar Escaneo</button>
+  <div id="video"></div>
+
+  <script>
+    let scanning = false;
+
+    document.getElementById('start-scan').addEventListener('click', () => {
+      if (scanning) return;
+      scanning = true;
+
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector('#video'),
+          constraints: { facingMode: "environment" }
+        },
+        decoder: {
+          readers: ["ean_reader", "code_128_reader"]
+        }
+      }, (err) => {
+        if (err) {
+          console.error(err);
+          alert("Error al iniciar cámara: " + err);
+          scanning = false;
+          return;
+        }
+        Quagga.start();
+      });
+
+      Quagga.onDetected((data) => {
+        const code = data.codeResult.code;
+        handleDetected(code);
+      });
+    });
+
+    function handleDetected(code){
+      try{ Quagga.stop(); } catch(e){}
+      scanning = false;
+
+      if(code === "0123456789128"){
+        window.location.href = "https://www.canva.com/design/DAG11fihzbY/3CUtPiy-qj6QXLOcIko8Zg/view?utm_content=DAG11fihzbY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton";
+      } else {
+        const url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(code)}`;
+        window.open(url, '_blank');
+      }
+    }
+  </script>
+
+</body>
+</html>
